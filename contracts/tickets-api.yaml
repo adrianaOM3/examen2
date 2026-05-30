@@ -1,0 +1,236 @@
+openapi: 3.0.3
+
+info:
+  title: PANINI API
+  version: 1.0.0
+  description: |
+    API RESTful para la plataforma PANINI
+
+paths:
+
+/api/auth/login:
+post:
+tags:
+  - Authentication
+summary: Authenticate user
+requestBody:
+required: true
+content:
+application/json:
+schema:
+$ref: '#/components/schemas/LoginRequest'
+responses:
+"200":
+description: Login successful
+content:
+application/json:
+schema:
+$ref: '#/components/schemas/AuthResponse'
+"401":
+description: Invalid credentials
+
+/api/tickets:
+get:
+tags:
+  - Tickets
+summary: Get all support tickets
+responses:
+"200":
+description: List of tickets
+content:
+application/json:
+schema:
+type: array
+items:
+$ref: '#/components/schemas/Ticket'
+
+post:
+  tags:
+    - Tickets
+  summary: Create a new support ticket
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/CreateTicketRequest'
+  responses:
+    "201":
+      description: Ticket created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ticket'
+
+/api/tickets/{ticketId}:
+get:
+tags:
+  - Tickets
+summary: Get ticket details
+parameters:
+  - in: path
+name: ticketId
+required: true
+schema:
+type: string
+responses:
+"200":
+description: Ticket details
+content:
+application/json:
+schema:
+$ref: '#/components/schemas/Ticket'
+"404":
+description: Ticket not found
+
+/api/tickets/{ticketId}/status:
+patch:
+tags:
+  - Tickets
+summary: Update ticket status
+parameters:
+  - in: path
+name: ticketId
+required: true
+schema:
+type: string
+
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UpdateTicketStatusRequest'
+
+  responses:
+    "200":
+      description: Status updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ticket'
+
+components:
+
+schemas:
+
+LoginRequest:
+  type: object
+  required:
+    - email
+    - password
+  properties:
+    email:
+      type: string
+      example: admin@panini.com
+    password:
+      type: string
+      example: "123456"
+
+AuthResponse:
+  type: object
+  properties:
+    token:
+      type: string
+    user:
+      $ref: '#/components/schemas/User'
+
+User:
+  type: object
+  properties:
+    id:
+      type: string
+      example: "USR001"
+    name:
+      type: string
+      example: Logistics Supervisor
+    email:
+      type: string
+      example: logistics@panini.com
+
+Ticket:
+  type: object
+  properties:
+    id:
+      type: string
+      example: TCK-001
+
+    title:
+      type: string
+      example: Missing sticker packages
+
+    description:
+      type: string
+      example: Distributor reports missing packages from shipment.
+
+    supplier:
+      type: string
+      example: Panini Costa Rica Distribution
+
+    category:
+      type: string
+      enum:
+        - INVENTORY
+        - LOGISTICS
+        - DISTRIBUTION
+        - SUPPLIER
+        - TECHNICAL
+
+    priority:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+        - CRITICAL
+
+    status:
+      type: string
+      enum:
+        - OPEN
+        - IN_PROGRESS
+        - RESOLVED
+        - CLOSED
+
+    createdAt:
+      type: string
+      format: date-time
+
+CreateTicketRequest:
+  type: object
+  required:
+    - title
+    - description
+    - supplier
+    - category
+    - priority
+
+  properties:
+    title:
+      type: string
+
+    description:
+      type: string
+
+    supplier:
+      type: string
+
+    category:
+      type: string
+
+    priority:
+      type: string
+
+UpdateTicketStatusRequest:
+  type: object
+  required:
+    - status
+
+  properties:
+    status:
+      type: string
+      enum:
+        - OPEN
+        - IN_PROGRESS
+        - RESOLVED
+        - CLOSED
